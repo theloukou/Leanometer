@@ -1,21 +1,13 @@
-#define CAL_BUTTON 2
-#define MAX_BUTTON 3
-#define BRIGHTNESS_PIN 10
-#define LDR A0
-#define LDR_MIN_THRES 200
-#define LDR_MAX_THRES 800
-//#define CA_7SDU
-#define CC_7SDU
-
+#include "Definitions.h"
 #include "ShiftRegister74HC595.h"
 #include "I2Cdev.h"
 #include "EEPROM.h"
-#include "MPU6050_6Axis_MotionApps_V6_12.h"
+#include "MPU6050_6Axis_MotionApps612.h"
 #if I2CDEV_IMPLEMENTATION == I2CDEV_ARDUINO_WIRE
 #include "Wire.h"
 #endif
 
-ShiftRegister74HC595<2> disp(5, 6, 7);
+ShiftRegister74HC595<2> disp(SHIFT_REG_DATA, SHIFT_REG_CLOCK, SHIFT_REG_LATCH);
 MPU6050 IMU;
 
 // MPU control/status vars
@@ -45,10 +37,6 @@ void setup() {
   disp.setAllLow();
 #endif
 
-TCCR1B = TCCR1B & B11111000 | B00000001;  //pin 9+10 pwm freq 31.372 KHz
-//TCCR1B = TCCR1B & B11111000 | B00000100;  //pin 9+10 pwm freq 122.55 Hz
-//TCCR1B = TCCR1B & B11111000 | B00000101;  //pin 9+10 pwm freq 30.64 Hz
-
   serialStr.reserve(40);
   Serial.begin(115200);
 
@@ -58,18 +46,21 @@ TCCR1B = TCCR1B & B11111000 | B00000001;  //pin 9+10 pwm freq 31.372 KHz
   attachInterrupt(digitalPinToInterrupt(CAL_BUTTON), calButton, FALLING);
   attachInterrupt(digitalPinToInterrupt(MAX_BUTTON), maxButton, FALLING);
 
+  ledcSetup(PWM_CHAN, PWM_FREQ, PWM_RES);
+  ledcAttachPin(BRIGHTNESS_PIN, PWM_CHAN);
+
   eeprom_get();
 
   // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
-  Wire.setClock(400000); // 400kHz I2C clock
+  Wire.setClock(100000); // 400kHz I2C clock
 
   //initialise IMU
   IMUsetup();
 
   Serial.println("Ready!");
 
-  analogWrite(BRIGHTNESS_PIN, 25);
+  ledcWrite(PWM_CHAN, 25);
 
   //reset IMU FIFOs for clean start
   IMU.resetFIFO();
@@ -78,6 +69,8 @@ TCCR1B = TCCR1B & B11111000 | B00000001;  //pin 9+10 pwm freq 31.372 KHz
 void loop() {
   // if IMU programming failed, don't try to do anything
   if (!IMUReady) return;  //halt if MPU is missing
+
+  
 
   IMUdata();
 //  Serial.println(angle);

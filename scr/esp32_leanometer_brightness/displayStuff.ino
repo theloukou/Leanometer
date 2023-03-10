@@ -74,7 +74,7 @@ void brightness() {
   else {
     bright_value = 255;
   }
-  analogWrite(BRIGHTNESS_PIN, bright_value);
+  ledcWrite(PWM_CHAN, bright_value);
 //  Serial.print(ldr_value);
 //  Serial.print("\t");
 //  Serial.println(bright_value);
