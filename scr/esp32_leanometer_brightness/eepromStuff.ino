@@ -1,29 +1,47 @@
+//void eeprom_get() {
+//  int eeAddress = 0;
+//  EEPROM.get(eeAddress, xAccelOffset);
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.get(eeAddress, yAccelOffset);
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.get(eeAddress, zAccelOffset);
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.get(eeAddress, xGyroOffset);
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.get(eeAddress, yGyroOffset);
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.get(eeAddress, zGyroOffset);
+//}
+//
+//void eeprom_put() {
+//  int eeAddress = 0;
+//  EEPROM.put(eeAddress, IMU.getXAccelOffset());
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.put(eeAddress, IMU.getYAccelOffset());
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.put(eeAddress, IMU.getZAccelOffset());
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.put(eeAddress, IMU.getXGyroOffset());
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.put(eeAddress, IMU.getYGyroOffset());
+//  eeAddress += sizeof(int16_t);
+//  EEPROM.put(eeAddress, IMU.getZGyroOffset());
+//}
+
 void eeprom_get() {
-  int eeAddress = 0;
-  EEPROM.get(eeAddress, xAccelOffset);
-  eeAddress += sizeof(int);
-  EEPROM.get(eeAddress, yAccelOffset);
-  eeAddress += sizeof(int);
-  EEPROM.get(eeAddress, zAccelOffset);
-  eeAddress += sizeof(int);
-  EEPROM.get(eeAddress, xGyroOffset);
-  eeAddress += sizeof(int);
-  EEPROM.get(eeAddress, yGyroOffset);
-  eeAddress += sizeof(int);
-  EEPROM.get(eeAddress, zGyroOffset);
+  xAccelOffset = prefs.getShort("xAccelOffset", 0);
+  yAccelOffset = prefs.getShort("yAccelOffset", 0);
+  zAccelOffset = prefs.getShort("zAccelOffset", 0);
+  xGyroOffset = prefs.getShort("xGyroOffset", 0);
+  yGyroOffset = prefs.getShort("yGyroOffset", 0);
+  zGyroOffset = prefs.getShort("zGyroOffset", 0);
 }
 
 void eeprom_put() {
-  int eeAddress = 0;
-  EEPROM.put(eeAddress, IMU.getXAccelOffset());
-  eeAddress += sizeof(int);
-  EEPROM.put(eeAddress, IMU.getYAccelOffset());
-  eeAddress += sizeof(int);
-  EEPROM.put(eeAddress, IMU.getZAccelOffset());
-  eeAddress += sizeof(int);
-  EEPROM.put(eeAddress, IMU.getXGyroOffset());
-  eeAddress += sizeof(int);
-  EEPROM.put(eeAddress, IMU.getYGyroOffset());
-  eeAddress += sizeof(int);
-  EEPROM.put(eeAddress, IMU.getZGyroOffset());
+  prefs.putShort("xAccelOffset", IMU.getXAccelOffset());
+  prefs.putShort("yAccelOffset", IMU.getYAccelOffset());
+  prefs.putShort("zAccelOffset", IMU.getZAccelOffset());
+  prefs.putShort("xGyroOffset", IMU.getXGyroOffset());
+  prefs.putShort("yGyroOffset", IMU.getYGyroOffset());
+  prefs.putShort("zGyroOffset", IMU.getZGyroOffset());
 }

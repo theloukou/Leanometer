@@ -1,4 +1,8 @@
 #include "Definitions.h"
+#include "FS.h"
+#include "SD.h"
+#include "SPI.h"
+#include "Preferences.h"
 #include "ShiftRegister74HC595.h"
 #include "I2Cdev.h"
 #include "EEPROM.h"
@@ -9,6 +13,7 @@
 
 ShiftRegister74HC595<2> disp(SHIFT_REG_DATA, SHIFT_REG_CLOCK, SHIFT_REG_LATCH);
 MPU6050 IMU;
+Preferences prefs;
 
 // MPU control/status vars
 bool IMUReady = false;  // set true if DMP init was successful
@@ -27,6 +32,14 @@ String serialStr;
 double angle, maxAngle = 0;
 bool calTriggered = false, maxTriggered = false;
 unsigned long buttonTime;
+
+void IRAM_ATTR calButton() {
+  calTriggered = true;
+}
+
+void IRAM_ATTR maxButton() {
+  maxTriggered = true;
+}
 
 void setup() {
 #ifdef CA_7SDU
@@ -49,14 +62,19 @@ void setup() {
   ledcSetup(PWM_CHAN, PWM_FREQ, PWM_RES);
   ledcAttachPin(BRIGHTNESS_PIN, PWM_CHAN);
 
+  // initialize EEPROM with predefined size
+  prefs.begin(PREF_NAMESPACE, false);
   eeprom_get();
 
   // join I2C bus (I2Cdev library doesn't do this automatically)
   Wire.begin();
-  Wire.setClock(100000); // 400kHz I2C clock
+  Wire.setClock(100000);
 
   //initialise IMU
   IMUsetup();
+
+  //initialize SD
+  sdInit();
 
   Serial.println("Ready!");
 
@@ -70,10 +88,8 @@ void loop() {
   // if IMU programming failed, don't try to do anything
   if (!IMUReady) return;  //halt if MPU is missing
 
-  
-
   IMUdata();
-//  Serial.println(angle);
+  //  Serial.println(angle);
   updateDisp(abs(angle));
 
   if (abs(angle) > maxAngle) {
@@ -84,12 +100,4 @@ void loop() {
 
   calCheck();
   maxCheck();
-}
-
-void calButton() {
-  calTriggered = true;
-}
-
-void maxButton() {
-  maxTriggered = true;
 }
